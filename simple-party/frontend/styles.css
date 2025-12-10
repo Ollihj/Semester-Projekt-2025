@@ -1,0 +1,180 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    min-height: 100vh;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+}
+
+.container {
+    background: white;
+    border-radius: 20px;
+    padding: 40px;
+    max-width: 500px;
+    width: 100%;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+}
+
+header {
+    text-align: center;
+    margin-bottom: 40px;
+}
+
+h1 {
+    font-size: 32px;
+    color: #333;
+    margin-bottom: 10px;
+}
+
+.party-code {
+    font-size: 14px;
+    color: #666;
+    margin-bottom: 5px;
+}
+
+.party-code strong {
+    color: #667eea;
+    font-size: 18px;
+}
+
+.member-count {
+    font-size: 13px;
+    color: #888;
+}
+
+.track-card {
+    background: #f7f7f7;
+    border-radius: 15px;
+    padding: 30px;
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+#trackTitle {
+    font-size: 24px;
+    color: #333;
+    margin-bottom: 10px;
+}
+
+#trackArtist {
+    font-size: 16px;
+    color: #666;
+}
+
+.track-genre {
+    font-size: 12px;
+    color: #999;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-top: 8px;
+    font-weight: 600;
+}
+
+/* NEW: Progress Bar Styles */
+.progress-container {
+    margin-bottom: 30px;
+}
+
+.progress-bar {
+    width: 100%;
+    height: 8px;
+    background: #e0e0e0;
+    border-radius: 10px;
+    overflow: hidden;
+    margin-bottom: 8px;
+}
+
+.progress-fill {
+    height: 100%;
+    background: #667eea;
+    width: 0%;
+}
+
+.progress-time {
+    display: flex;
+    justify-content: space-between;
+    font-size: 12px;
+    color: #999;
+}
+
+.voting {
+    display: flex;
+    gap: 20px;
+    justify-content: center;
+    margin-bottom: 20px;
+}
+
+.vote-btn {
+    background: white;
+    border: 2px solid #ddd;
+    border-radius: 50%;
+    width: 80px;
+    height: 80px;
+    font-size: 32px;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+}
+
+.vote-btn:hover {
+    transform: scale(1.05);
+}
+
+.vote-btn:active {
+    transform: scale(0.95);
+}
+
+.upvote {
+    border-color: #4CAF50;
+}
+
+.upvote:hover {
+    background: #4CAF50;
+    color: white;
+}
+
+.upvote.voted {
+    background: #4CAF50;
+    color: white;
+    border-color: #4CAF50;
+    box-shadow: 0 0 20px rgba(76, 175, 80, 0.5);
+}
+
+.downvote {
+    border-color: #f44336;
+}
+
+.downvote:hover {
+    background: #f44336;
+    color: white;
+}
+
+.downvote.voted {
+    background: #f44336;
+    color: white;
+    border-color: #f44336;
+    box-shadow: 0 0 20px rgba(244, 67, 54, 0.5);
+}
+
+.vote-count {
+    font-size: 14px;
+    font-weight: bold;
+    margin-top: 5px;
+}
+
+.hint {
+    text-align: center;
+    font-size: 14px;
+    color: #999;
+}

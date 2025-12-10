@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>NextTrack Party</title>
+        <link rel="icon" type="image/x-icon" href="favicon.ico">
+        <link rel="stylesheet" href="styles.css">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
+    </head>
+    <body>
+        <div class="container">
+            <header>
+                <h1>🎵 NextTrack Party</h1>
+                <p class="party-code">Party Code: <strong id="partyCode">...</strong></p>
+                <p class="member-count">👥 <span id="memberCount">1</span> people here</p>
+            </header>
+            
+            <main id="content">
+                <div class="track-card">
+                    <h2 id="trackTitle">Loading...</h2>
+                    <p id="trackArtist">Please wait...</p>
+                    <p class="track-genre" id="trackGenre">...</p>
+                </div>
+                
+                <!-- NEW: Progress Bar -->
+                <div class="progress-container">
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="progressFill"></div>
+                    </div>
+                    <div class="progress-time">
+                        <span id="currentTime">0:00</span>
+                        <span id="totalTime">0:00</span>
+                    </div>
+                </div>
+                
+                <div class="voting">
+                    <button id="upvoteBtn" class="vote-btn upvote">
+                        👍
+                        <span class="vote-count" id="upvoteCount">0</span>
+                    </button>
+                    <button id="downvoteBtn" class="vote-btn downvote">
+                        👎
+                        <span class="vote-count" id="downvoteCount">0</span>
+                    </button>
+                </div>
+                
+                <p class="hint">Vote on tracks to influence what plays next!</p>
+            </main>
+        </div>
+    </body>
+    <script src="index.js" type="module"></script>
+</html>
