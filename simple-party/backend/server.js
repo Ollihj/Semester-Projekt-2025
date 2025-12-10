@@ -27,7 +27,15 @@ server.post('/api/party/:partyCode/vote', recordVote);
 server.post('/api/party/:partyCode/heartbeat', recordHeartbeat);
 server.get('/api/party/:partyCode/members', getMemberCount);
 
-// Fallback: serve index.html for any other route
+// Fallback: serve landing page for root, party page for /party/*
+server.get('/', (request, response) => {
+    response.sendFile(path.join(import.meta.dirname, '..', 'frontend', 'landing.html'));
+});
+
+server.get('/party/:partyCode', (request, response) => {
+    response.sendFile(path.join(import.meta.dirname, '..', 'frontend', 'index.html'));
+});
+
 server.get(/\/[a-zA-Z0-9-_/]+/, serveFrontend);
 server.listen(port, () => console.log('Server running on port', port));
 

@@ -33,12 +33,20 @@ addEventListener("DOMContentLoaded", () => {
 function getPartyCode() {
     // Check if there's a party code in the URL
     const pathname = window.location.pathname;
-    if (pathname.startsWith('/') && pathname.length > 1) {
-        return pathname.substring(1);  // Remove the leading /
-    } else {
-        // No party code - generate a random 4-character one
-        return crypto.randomUUID().substring(0, 4);
+    
+    // URL format: /party/abc123
+    if (pathname.startsWith('/party/')) {
+        return pathname.substring(7); // Remove "/party/"
     }
+    
+    // Old format: /abc123 (still works)
+    if (pathname.startsWith('/') && pathname.length > 1) {
+        return pathname.substring(1);
+    }
+    
+    // No party code - shouldn't happen with landing page
+    // But just in case, generate one
+    return crypto.randomUUID().substring(0, 4);
 }
 
 // VOTING
