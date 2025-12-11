@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NextTrack Party</title>
+    <link rel="stylesheet" href="/landing.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🎵 NextTrack Party</h1>
+            <p class="tagline">Vote on music together</p>
+        </header>
+
+        <div class="card">
+            <h2>Join a Party</h2>
+            <p>Enter a party code to join your friends</p>
+            <form id="joinForm">
+                <input 
+                    type="text" 
+                    id="partyCodeInput" 
+                    placeholder="Enter party code (e.g. abc123)"
+                    maxlength="10"
+                    required
+                >
+                <button type="submit" class="btn btn-primary">Join Party</button>
+            </form>
+        </div>
+
+        <div class="divider">
+            <span>OR</span>
+        </div>
+
+        <div class="card">
+            <h2>Create New Party</h2>
+            <p>Start a new party and invite others</p>
+            <button id="createButton" class="btn btn-secondary">Create Party</button>
+        </div>
+    </div>
+
+    <script src="/landing.js"></script>
+</body>
+</html>

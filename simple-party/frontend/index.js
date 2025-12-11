@@ -53,12 +53,12 @@ function getPartyCode() {
 
 function setupVotingButtons(partyCode) {
     // When user clicks upvote button
-    document.getElementById('upvote').addEventListener('click', () => {
+    document.getElementById('upvoteBtn').addEventListener('click', () => {
         vote(partyCode, 'up');
     });
     
     // When user clicks downvote button
-    document.getElementById('downvote').addEventListener('click', () => {
+    document.getElementById('downvoteBtn').addEventListener('click', () => {
         vote(partyCode, 'down');
     });
 }
@@ -97,8 +97,8 @@ async function updateVoteDisplay() {
     myCurrentVote = myVoteData.myVote;
     
     // Update button styling
-    const upvoteButton = document.getElementById('upvote');
-    const downvoteButton = document.getElementById('downvote');
+    const upvoteButton = document.getElementById('upvoteBtn');
+    const downvoteButton = document.getElementById('downvoteBtn');
     
     if (myCurrentVote === 'up') {
         upvoteButton.classList.add('voted');

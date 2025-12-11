@@ -15,11 +15,10 @@ const partyMembers = new Map();   // Who's currently in each party (for member c
 const port = process.env.PORT || 3003;
 const server = express();
 
-server.use(express.static('frontend'));
 server.use(express.json());
 server.use(logRequests);
 
-// API endpoints
+// API endpoints FIRST
 server.get('/api/party/:partyCode/currentTrack', getCurrentTrack);
 server.get('/api/party/:partyCode/votes', getVoteCounts);
 server.get('/api/party/:partyCode/myvote/:sessionId', getMyVote);
@@ -27,16 +26,24 @@ server.post('/api/party/:partyCode/vote', recordVote);
 server.post('/api/party/:partyCode/heartbeat', recordHeartbeat);
 server.get('/api/party/:partyCode/members', getMemberCount);
 
-// Fallback: serve landing page for root, party page for /party/*
+// Root route - landing page (EXACT match only)
 server.get('/', (request, response) => {
+    console.log('✅ ROOT ROUTE - Serving landing.html');
     response.sendFile(path.join(import.meta.dirname, '..', 'frontend', 'landing.html'));
 });
 
-server.get('/party/:partyCode', (request, response) => {
+// Party route - Use regex to avoid catching files with dots
+server.get(/^\/party\/([a-zA-Z0-9-]+)$/, (request, response) => {
+    const partyCode = request.params[0];
+    console.log('✅ PARTY ROUTE - Serving index.html for party:', partyCode);
     response.sendFile(path.join(import.meta.dirname, '..', 'frontend', 'index.html'));
 });
 
-server.get(/\/[a-zA-Z0-9-_/]+/, serveFrontend);
+// Static files LAST (CSS, JS, images) - but don't auto-serve index.html
+server.use(express.static(path.join(import.meta.dirname, '..', 'frontend'), {
+    index: false
+}));
+
 server.listen(port, () => console.log('Server running on port', port));
 
 // ENDPOINT HANDLERS
@@ -316,10 +323,6 @@ async function loadTracks() {
 }
 
 function logRequests(request, response, next) {
-    console.log(new Date(), request.method, request.url);
+    console.log(new Date().toISOString(), request.method, request.url);
     next();
-}
-
-function serveFrontend(request, response) {
-    response.sendFile(path.join(import.meta.dirname, '..', 'frontend', 'index.html'));
 }
