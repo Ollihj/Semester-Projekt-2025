@@ -8,9 +8,9 @@ const db = await connect();
 const tracks = await loadTracks();
 
 // Store active party data in memory
-const currentTracks = new Map();  // Which track is playing at each party
-const trackHistory = new Map();   // Last 5 tracks played at each party (to avoid repeats)
-const partyMembers = new Map();   // Who's currently in each party (for member count)
+const currentTracks = new Map();
+const trackHistory = new Map();
+const partyMembers = new Map();
 
 const port = process.env.PORT || 3003;
 const server = express();
@@ -18,7 +18,24 @@ const server = express();
 server.use(express.json());
 server.use(logRequests);
 
-// API endpoints FIRST
+// Serve specific static files explicitly
+server.get('/styles.css', (req, res) => {
+    res.sendFile(path.join(import.meta.dirname, '..', 'frontend', 'styles.css'));
+});
+
+server.get('/landing.css', (req, res) => {
+    res.sendFile(path.join(import.meta.dirname, '..', 'frontend', 'landing.css'));
+});
+
+server.get('/index.js', (req, res) => {
+    res.sendFile(path.join(import.meta.dirname, '..', 'frontend', 'index.js'));
+});
+
+server.get('/landing.js', (req, res) => {
+    res.sendFile(path.join(import.meta.dirname, '..', 'frontend', 'landing.js'));
+});
+
+// API endpoints
 server.get('/api/party/:partyCode/currentTrack', getCurrentTrack);
 server.get('/api/party/:partyCode/votes', getVoteCounts);
 server.get('/api/party/:partyCode/myvote/:sessionId', getMyVote);
@@ -26,23 +43,17 @@ server.post('/api/party/:partyCode/vote', recordVote);
 server.post('/api/party/:partyCode/heartbeat', recordHeartbeat);
 server.get('/api/party/:partyCode/members', getMemberCount);
 
-// Root route - landing page (EXACT match only)
+// Root route - landing page
 server.get('/', (request, response) => {
-    console.log('✅ ROOT ROUTE - Serving landing.html');
+    console.log('Serving landing.html');
     response.sendFile(path.join(import.meta.dirname, '..', 'frontend', 'landing.html'));
 });
 
-// Party route - Use regex to avoid catching files with dots
-server.get(/^\/party\/([a-zA-Z0-9-]+)$/, (request, response) => {
-    const partyCode = request.params[0];
-    console.log('✅ PARTY ROUTE - Serving index.html for party:', partyCode);
+// Party route
+server.get('/party/:partyCode', (request, response) => {
+    console.log('Serving index.html for party:', request.params.partyCode);
     response.sendFile(path.join(import.meta.dirname, '..', 'frontend', 'index.html'));
 });
-
-// Static files LAST (CSS, JS, images) - but don't auto-serve index.html
-server.use(express.static(path.join(import.meta.dirname, '..', 'frontend'), {
-    index: false
-}));
 
 server.listen(port, () => console.log('Server running on port', port));
 
@@ -53,7 +64,6 @@ function getCurrentTrack(request, response) {
     let track = currentTracks.get(partyCode);
     
     if (!track) {
-        // No track playing yet - pick one
         track = pickNextTrack(partyCode);
     }
     
@@ -68,7 +78,6 @@ function getVoteCounts(request, response) {
         return response.json({ upvotes: 0, downvotes: 0 });
     }
     
-    // Count votes from database
     db.query(`
         select vote_type, count(*) as count
         from votes
@@ -97,7 +106,6 @@ function getMyVote(request, response) {
         return response.json({ myVote: null });
     }
     
-    // Check if this specific user has voted on this track
     db.query(`
         select vote_type
         from votes
@@ -129,8 +137,6 @@ function recordVote(request, response) {
         return response.status(400).json({ error: 'Session ID required' });
     }
     
-    // Store vote in database
-    // If this user already voted on this track, update their vote
     db.query(`
         insert into votes (party_code, track_id, session_id, vote_type)
         values ($1, $2, $3, $4)
@@ -154,14 +160,12 @@ function recordHeartbeat(request, response) {
         return response.status(400).json({ error: 'Session ID required' });
     }
     
-    // Get or create the members map for this party
     let members = partyMembers.get(partyCode);
     if (!members) {
         members = new Map();
         partyMembers.set(partyCode, members);
     }
     
-    // Record when this user was last seen
     members.set(sessionId, Date.now());
     
     response.json({ success: true });
@@ -175,16 +179,15 @@ function getMemberCount(request, response) {
         return response.json({ count: 0 });
     }
     
-    // Remove members who haven't been seen in 15 seconds
     const now = Date.now();
-    const timeout = 15000;  // 15 seconds
+    const timeout = 15000;
     
     let activeCount = 0;
     for (const [sessionId, lastSeen] of members.entries()) {
         if (now - lastSeen < timeout) {
             activeCount++;
         } else {
-            members.delete(sessionId);  // Clean up inactive members
+            members.delete(sessionId);
         }
     }
     
@@ -194,10 +197,8 @@ function getMemberCount(request, response) {
 // TRACK SELECTION ALGORITHM
 
 async function pickNextTrack(partyCode) {
-    // Step 1: Get recently played tracks (to avoid repeats)
     let recentTracks = trackHistory.get(partyCode) || [];
     
-    // Step 2: Get all votes for this party
     const voteResult = await db.query(`
         select 
             track_id,
@@ -208,7 +209,6 @@ async function pickNextTrack(partyCode) {
         order by score desc
     `, [partyCode]);
     
-    // Step 3: Find tracks the party LIKES (more upvotes than downvotes)
     const likedResult = await db.query(`
         select 
             track_id,
@@ -227,48 +227,39 @@ async function pickNextTrack(partyCode) {
         console.log(`[${partyCode}] Party likes: ${categories.join(', ')}`);
     }
     
-    // Step 4: Score every track
     let bestTrack = null;
     let bestScore = -999999;
     
     for (const track of tracks) {
-        // Skip if played recently
         if (recentTracks.includes(track.track_id)) {
             continue;
         }
         
-        // Get vote score (0 if nobody voted on this track)
         let voteScore = 0;
         const votedTrack = voteResult.rows.find(v => v.track_id === track.track_id);
         if (votedTrack) {
             voteScore = parseInt(votedTrack.score);
         }
         
-        // Calculate similarity bonus
         let similarityBonus = 0;
         for (const likedTrack of likedTracks) {
-            // Same category? Give it bonus points
             if (getCategory(track.track_id) === getCategory(likedTrack.track_id)) {
                 similarityBonus += 2;
             }
             
-            // Same artist? Give it even more bonus points
             if (track.artist === likedTrack.artist) {
                 similarityBonus += 3;
             }
         }
         
-        // Total score = direct votes + similarity bonus
         const totalScore = voteScore + similarityBonus;
         
-        // Keep track of the best option
         if (totalScore > bestScore || (totalScore === bestScore && Math.random() < 0.1)) {
             bestScore = totalScore;
             bestTrack = track;
         }
     }
     
-    // Step 5: If all scores are 0 (no votes yet), pick random
     if (!bestTrack || bestScore === 0) {
         const availableTracks = tracks.filter(t => !recentTracks.includes(t.track_id));
         const randomIndex = Math.floor(Math.random() * availableTracks.length);
@@ -277,14 +268,12 @@ async function pickNextTrack(partyCode) {
     
     console.log(`[${partyCode}] Playing: "${bestTrack.title}" (${getCategory(bestTrack.track_id)})`);
     
-    // Step 6: Remember this track (so we don't repeat it soon)
     recentTracks.push(bestTrack.track_id);
     if (recentTracks.length > 5) {
-        recentTracks = recentTracks.slice(-5);  // Keep only last 5
+        recentTracks = recentTracks.slice(-5);
     }
     trackHistory.set(partyCode, recentTracks);
     
-    // Step 7: Add timestamp (so frontend knows when it started)
     const startedAt = Date.now();
     const trackWithTimestamp = {
         ...bestTrack,
@@ -293,7 +282,6 @@ async function pickNextTrack(partyCode) {
     
     currentTracks.set(partyCode, trackWithTimestamp);
     
-    // Step 8: Start playing (when it finishes, pick next track automatically)
     play(partyCode, bestTrack.track_id.toString(), bestTrack.duration, startedAt, () => {
         currentTracks.delete(partyCode);
         pickNextTrack(partyCode);
@@ -305,7 +293,6 @@ async function pickNextTrack(partyCode) {
 // HELPER FUNCTIONS
 
 function getCategory(trackId) {
-    // We organized tracks by ID ranges
     const id = parseInt(trackId);
     if (id >= 1000 && id < 2000) return 'pop';
     if (id >= 2000 && id < 3000) return 'chill';
